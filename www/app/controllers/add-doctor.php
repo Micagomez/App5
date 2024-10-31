@@ -20,6 +20,8 @@ if (isset($_SESSION) && isset($_SESSION['rol'])) {
 if (isset($_POST['submit'])) {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
     $onlineConsultation = $_POST['onlineConsultation'];
     $street = $_POST['street'];
     $number = $_POST['number'];
@@ -118,6 +120,18 @@ if ($conexion) {
                     exit();
                 }
             }
+        }
+
+        $queryUser = "INSERT INTO user (id_specialist, id_rol, email, password) VALUES (:id_specialist, :id_rol, :email, :password)";
+        $stmtUser = $conexion->prepare($queryUser);
+        $stmtUser->bindParam(':id_specialist', $id_specialist, PDO::PARAM_INT);
+        $stmtUser->bindParam(':id_rol', 3, PDO::PARAM_INT);
+        $stmtUser->bindParam(':email', $email, PDO::PARAM_INT);
+        $stmtUser->bindParam(':password', $password, PDO::PARAM_INT);
+        if (!$stmtUser->execute()) {
+            $conexion->rollBack();
+            echo "Error al insertar email y contraseña.";
+            exit();
         }
 
         // Confirmar la transacción
