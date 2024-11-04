@@ -29,12 +29,12 @@
 					<ul class="sub-menu">
 						<li>
 							<a href="add-doctor.php">
-								<span class="title"> Agregar Doctor</span>
+								<span class="title"> Agregar Médico</span>
 							</a>
 						</li>
 						<li>
 							<a href="doctorsList.php">
-								<span class="title"> Administrar Doctores </span>
+								<span class="title"> Administrar Médicos </span>
 							</a>
 						</li>
 					</ul>
