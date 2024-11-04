@@ -13,7 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $pass_sql = $usuario['password'];
             $_SESSION['user'] = $usuario['id'];
             $_SESSION['rol'] = $usuario['id_rol'];
-            $_SESSION['person'] = $usuario['id_person'];
+            if(!empty($usuario['id_person'])){
+                $_SESSION['person'] = $usuario['id_person'];
+            }else{
+                $_SESSION['specialist'] = $usuario['id_specialist'];
+            }
             $_SESSION['email'] = $usuario['email'];
 
             if($email == $email_sql && password_verify($password, $pass_sql)){
@@ -26,6 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 elseif ($_SESSION['rol'] == 2) {
                     // Redirigir al dashboard de admin
                     $response['redirect_url'] = "../views/admin/dashboard.php";
+                }
+                elseif ($_SESSION['rol'] == 3) {
+                    // Redirigir al dashboard de admin
+                    $response['redirect_url'] = "../views/doctor/dashboard.php";
                 }
                 echo json_encode($response);
                 exit();

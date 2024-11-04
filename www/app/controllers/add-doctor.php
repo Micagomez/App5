@@ -125,9 +125,10 @@ if ($conexion) {
         $queryUser = "INSERT INTO user (id_specialist, id_rol, email, password) VALUES (:id_specialist, :id_rol, :email, :password)";
         $stmtUser = $conexion->prepare($queryUser);
         $stmtUser->bindParam(':id_specialist', $id_specialist, PDO::PARAM_INT);
-        $stmtUser->bindParam(':id_rol', 3, PDO::PARAM_INT);
-        $stmtUser->bindParam(':email', $email, PDO::PARAM_INT);
-        $stmtUser->bindParam(':password', $password, PDO::PARAM_INT);
+        $stmtUser->bindValue(':id_rol', 3, PDO::PARAM_INT);
+        $stmtUser->bindParam(':email', $email, PDO::PARAM_STR);
+        $passwordHashed = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $stmtUser->bindParam(':password', $passwordHashed, PDO::PARAM_STR);
         if (!$stmtUser->execute()) {
             $conexion->rollBack();
             echo "Error al insertar email y contraseña.";
