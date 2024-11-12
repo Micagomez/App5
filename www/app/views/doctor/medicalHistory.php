@@ -1,9 +1,7 @@
 <?php
 session_start();
 require_once '../../models/getContacts.php';
-require_once '../../models/getAddress.php';
 require_once '../../models/getPersons.php';
-require_once '../../models/getNeighborhood.php';
 
 if (isset( $_SESSION)) {
     if (( $_SESSION['rol']) == "" or  $_SESSION['rol'] != '3') {        
@@ -36,7 +34,7 @@ $personas= obtenerPersonas();
                         <section id="page-title">
                             <div class="row">
                                 <div class="col-sm-8">
-                                    <h1 class="mainTitle">Médico | Vista Historial Clínico</h1>
+                                    <h1 class="mainTitle">Médico | Lista de Pacientes</h1>
                                 </div>
                                 <ol class="breadcrumb">
                                     <li>
