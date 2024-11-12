@@ -71,6 +71,16 @@ $specialities = obtenerEspecialidades();
                                                         <input type="text" name="surname" class="form-control" placeholder="Apellido" required>
                                                     </div>
 
+                                                    <div class="form-group">
+                                                        <label for="doctorEmail">Email</label>
+                                                        <input type="email" name="email" class="form-control" placeholder="email@email.com" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="doctorname">Contraseña</label>
+                                                        <input type="password" name="password" class="form-control" required>
+                                                    </div>
+
                                                     <div class="form-group" required>
                                                         <label for="doctorname">Especialidades</label>
                                                         <select name="specialities[]" class="form-control select2-multi" multiple="multiple" placeholder="Seleccione una o más especialidades">
