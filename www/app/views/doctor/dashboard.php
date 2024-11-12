@@ -67,10 +67,10 @@ if(empty($_SESSION)){
                                             <i class="fa fa-square fa-stack-2x text-primary"></i>
                                             <i class="fa fa-users fa-stack-1x fa-inverse"></i>
                                         </span>
-                                        <h2 class="StepTitle">Administrar paciente</h2>
+                                        <h2 class="StepTitle">Últimos Historiales Creados</h2>
                                         <p class="cl-effect-1">
-                                            <a href="manage-patients.php">
-                                                Lista de pacientes
+                                            <a href="listClinicalHistoy.php">
+                                                Lista de historales clínicos
                                             </a>
                                         </p>
                                     </div>
