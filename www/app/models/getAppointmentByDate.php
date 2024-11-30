@@ -5,14 +5,16 @@ function obtenerTurnosDelEspecialista($date, $id_specialist) {
     $conecction = conectar();
 
     if ($conecction) {
-        $query = "SELECT 
+        $query = "SELECT
             a.id,
             a.date,
             a.id_specialist,
+            a.status,
             p.name,
             p.surname,
             p.dni,
             p.birth_date,
+            p.id as person_id,
             c.contact
         FROM 
             appointment a
@@ -25,7 +27,7 @@ function obtenerTurnosDelEspecialista($date, $id_specialist) {
         WHERE 
             a.date = :date 
             AND a.id_specialist = :id_specialist 
-            AND a.status = 1;
+            AND a.status IN (1, 3, 4);
         ";
 
         $stmt = $conecction->prepare($query);

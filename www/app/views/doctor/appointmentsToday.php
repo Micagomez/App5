@@ -17,7 +17,6 @@ if (isset( $_SESSION)) {
 }
 $date = date('Y-m-d');
 $turnos = obtenerTurnosDelEspecialista($date, $_SESSION['specialist']);
-//var_dump($turnos);
 ?>
 
 <!DOCTYPE html>
@@ -56,6 +55,7 @@ $turnos = obtenerTurnosDelEspecialista($date, $_SESSION['specialist']);
                                                 <th class="center">Contacto</th>
                                                 <th class="center">D.N.I</th>
                                                 <th class="center">Fecha de Nacimiento</th>
+                                                <th class="center">Estado</th>
                                                 <th class="center">Acción</th>
                                             </tr>
                                         </thead>
@@ -71,13 +71,26 @@ $turnos = obtenerTurnosDelEspecialista($date, $_SESSION['specialist']);
                                                     <td class="hidden-xs"><?php echo $turno['dni']; ?></td>
                                                     <td class="hidden-xs"><?php echo date('d/m/Y', strtotime($turno['birth_date'])); ?></td>
                                                     <td class="hidden-xs">
-                                                        <a href="addClinicalHistory.php?id=<?php echo $turno['person_id']; ?>" class="btn btn-primary">Agregar Historial</a>
+                                                        <?php 
+                                                            if($turno['status'] == 1){
+                                                                echo "Paciente esperando a ser atendido";
+                                                            }elseif($turno['status'] == 3){
+                                                                echo "Paciente atendido";
+                                                            }else{
+                                                                echo "Paciente ausente";
+                                                            }
+                                                        ?>
+                                                    </td>
+                                                    <td class="hidden-xs">
+                                                        <button type="button" class="btn-attended btn btn-success" data-id="<?php echo $turno['id']; ?>">Paciente Atendido</button>
+                                                        <button type="button" class="btn-absent btn btn-danger" data-id="<?php echo $turno['id']; ?>">Paciente Ausente</button>
                                                     </td>
                                                 </tr>
                                             <?php
                                             } ?>
                                         </tbody>
                                     </table>
+                                    <div id="messaje"></div>
                                 </div>
                             </div>
                         </div>
@@ -91,6 +104,8 @@ $turnos = obtenerTurnosDelEspecialista($date, $_SESSION['specialist']);
 
         
         <?php include('../include/script.php'); ?>
+        <script src="../../../assets/js/appointmentCompleted.js"></script>
+        <script src="../../../assets/js/appointmentIncompleted.js"></script>
         
     </body>
 </html>
