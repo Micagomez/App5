@@ -25,9 +25,9 @@ if (isset( $_SESSION)) {
         exit();
 }
 
-$id_dia = "";
-$duracion_del_turno = "";
-$horario_atencion = "";
+//$id_dia = "";
+//$duracion_del_turno = "";
+//$horario_atencion = "";
 
 if (!empty($_POST['dia'])) {
     $id_dia = $_POST['dia'];

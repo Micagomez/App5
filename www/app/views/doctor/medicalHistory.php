@@ -1,7 +1,6 @@
 <?php
 session_start();
-require_once '../../models/getContacts.php';
-require_once '../../models/getPersons.php';
+require_once '../../models/getAppointmentByDate.php';
 
 if (isset( $_SESSION)) {
     if (( $_SESSION['rol']) == "" or  $_SESSION['rol'] != '3') {        
@@ -16,9 +15,8 @@ if (isset( $_SESSION)) {
     echo '</script>';
     exit();
 }
-
-$contactos = obtenerContactos();
-$personas= obtenerPersonas();
+$date = date('Y-m-d');
+$turnos = obtenerTurnosDelEspecialista($date, $_SESSION['specialist']);
 ?>
 
 <!DOCTYPE html>
@@ -32,9 +30,9 @@ $personas= obtenerPersonas();
                 <div class="main-content">
                     <div class="wrap-content container" id="container">
                         <section id="page-title">
-                            <div class="row">
+                            <div class="turno">
                                 <div class="col-sm-8">
-                                    <h1 class="mainTitle">Médico | Lista de Pacientes</h1>
+                                    <h1 class="mainTitle">Médico | Lista de Pacientes del Día de Hoy</h1>
                                 </div>
                                 <ol class="breadcrumb">
                                     <li>
@@ -47,7 +45,7 @@ $personas= obtenerPersonas();
                             </div>
                         </section>
                         <div class="container-fluid container-fullw bg-white">
-                            <div class="row">
+                            <div class="turno">
                                 <div class="col-md-12">
                                     <table class="table table-hover" id="sample-table-1">
                                         <thead>
@@ -62,26 +60,17 @@ $personas= obtenerPersonas();
                                         </thead>
                                         <tbody>
                                             <?php
-                                            foreach ($personas as $row) {
-                                                if($row['status'] == 0){
-                                                    continue; // evitamos mostrar los pacientes borrados
-                                                }
+                                            foreach ($turnos as $turno) {
                                             ?>
                                             
                                                 <tr class="center">
-                                                    <td class="hidden-xs"><?php echo $row['name']; ?></td>
-                                                    <td class="hidden-xs"><?php echo $row['surname']; ?></td>
-                                                    <td class="hidden-xs"><?php
-                                                    foreach($contactos as $contact){
-                                                        if($contact['id_person'] == $row['id']){
-                                                            echo $contact['contact'];
-                                                        }
-                                                    }
-                                                    ?></td>
-                                                    <td class="hidden-xs"><?php echo $row['dni']; ?></td>
-                                                    <td class="hidden-xs"><?php echo date('d/m/Y', strtotime($row['birth_date'])); ?></td>
+                                                    <td class="hidden-xs"><?php echo $turno['name']; ?></td>
+                                                    <td class="hidden-xs"><?php echo $turno['surname']; ?></td>
+                                                    <td class="hidden-xs"><?php echo $turno['contact'] ?></td>
+                                                    <td class="hidden-xs"><?php echo $turno['dni']; ?></td>
+                                                    <td class="hidden-xs"><?php echo date('d/m/Y', strtotime($turno['birth_date'])); ?></td>
                                                     <td class="hidden-xs">
-                                                        <a href="addClinicalHistory.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">Agregar Historial</a>
+                                                        <a href="addClinicalHistory.php?id=<?php echo $turno['id']; ?>" class="btn btn-primary">Agregar Historial</a>
                                                     </td>
                                                 </tr>
                                             <?php
