@@ -274,3 +274,5 @@ foreach($person as $patient){
         <?php include('../include/setting.php'); ?>
     </body>
 </html>
+
+
