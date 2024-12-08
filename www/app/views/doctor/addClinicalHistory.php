@@ -4,6 +4,7 @@ session_start();
 require_once '../../models/getSpecialistLicenseSpecialty.php';
 require_once '../../models/getPersonById.php';
 require_once '../../models/getTypeConsultation.php';
+require_once '../../models/checkExistingHistory.php';
 
 if (isset($_SESSION)) {
     if ($_SESSION['rol'] == "" or $_SESSION['rol'] != '3') {        
@@ -31,6 +32,7 @@ foreach($doctors as $doctor){
     if($doctor['specialist_id'] == $_SESSION['specialist']){
         $doctorName = $doctor['specialist_name'];
         $doctorSpeciality = $doctor['specialities'];
+        $idDoctorSpeciality = $doctor['speciality_ids'];
         $doctorId = $doctor['specialist_id'];
     }
 }
@@ -47,6 +49,7 @@ foreach($person as $patient){
     $birthDate = $patient['birth_date']; 
     $patientAge = calcularEdad($birthDate);
 }
+
 ?>
 
 
@@ -95,8 +98,8 @@ foreach($person as $patient){
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="speciality">Especialización Médico</label>
-                                                        <input id="speciality" name="speciality" type="text" class="form-control" readonly value="<?php echo $doctorSpeciality; ?>">
-                                                    </div>
+                                                        <input id="speciality" type="text" class="form-control" readonly value="<?php echo $doctorSpeciality; ?>">
+                                                        <input name="speciality_id" type="hidden" value="<?php echo $idDoctorSpeciality; ?>">                                                    </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
@@ -112,7 +115,7 @@ foreach($person as $patient){
                                                     <div class="form-group">
                                                         <label for="patient">Paciente</label>
                                                         <input type="text" readonly class="form-control" value="<?php echo $patientName; ?>">
-                                                        <input type="hidden" name="patient_id" value="<?php echo $personId; ?>">
+                                                        <input type="hidden" name="id_patient" value="<?php echo $personId; ?>">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2">
@@ -125,7 +128,7 @@ foreach($person as $patient){
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="consultation_type">Tipo de Consulta</label>
-                                                        <select name="consultas[]" class="form-control select2-multi"  placeholder="Tipo de consulta" required>
+                                                        <select name="id_consultation_type" class="form-control select2-multi" placeholder="Tipo de consulta" required>
                                                         <?php
                                                             if (!empty($consultas)) {
                                                                 foreach ($consultas as $consulta) {
@@ -136,8 +139,6 @@ foreach($person as $patient){
                                                             }
                                                             ?>
                                                         </select>
-
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -207,7 +208,7 @@ foreach($person as $patient){
                                                 <div class="col-md-12">
                                                     <div class="form-group">
                                                         <label for="medications">Medicamentos Recetados</label>
-                                                        <textarea name="medications" class="form-control" rows="3" placeholder="Nombre del medicamento, dosis, frecuencia"></textarea>
+                                                        <textarea name="medications" class="form-control" rows="3" placeholder="Nombre del medicamento, dosis, frecuencia" required></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -222,7 +223,59 @@ foreach($person as $patient){
                                                 </div>
                                             </div>
 
-                                            <button type="submit" name="submit" class="btn btn-primary btn-block">Guardar Historial Clínico</button>
+                                            <!-- <button type="submit" name="submit" class="btn btn-primary btn-block">Guardar Historial Clínico</button> -->
+                                            <button type="submit" name="submit" class="btn btn-primary btn-block" onclick="return confirmSave()">Guardar Historial Clínico</button>
+                                            
+                                            <script>
+                                                document.getElementById('clinicalHistoryForm').addEventListener('submit', function(e) {
+                                                    // Validación de campos requeridos
+                                                    const requiredFields = [
+                                                        'id_consultation_type', 
+                                                        'reason_consultation', 
+                                                        'current_symptoms', 
+                                                        'diagnostic', 
+                                                        'medications',
+                                                        'treatment_plan'
+                                                    ];
+                                                    
+                                                    let isValid = true;
+
+                                                    requiredFields.forEach(fieldName => {
+                                                        const field = document.querySelector(`[name="${fieldName}"]`);
+                                                        if (!field || !field.value.trim()) {
+                                                            field.classList.add('is-invalid');
+                                                            isValid = false;
+                                                        } else {
+                                                            field.classList.remove('is-invalid');
+                                                        }
+                                                    });
+
+                                                    // Validación de formato de presión arterial
+                                                    const bloodPressure = document.querySelector('[name="blood_pressure"]');
+                                                    if (bloodPressure && bloodPressure.value && !/^\d+\/\d+$/.test(bloodPressure.value)) {
+                                                        bloodPressure.classList.add('is-invalid');
+                                                        isValid = false;
+                                                        alert('La presión arterial debe tener el formato correcto (ej. 120/80).');
+                                                    } else if (bloodPressure) {
+                                                        bloodPressure.classList.remove('is-invalid');
+                                                    }
+
+                                                    // Cancelar el envío si no es válido
+                                                    if (!isValid) {
+                                                        e.preventDefault();
+                                                        alert('Por favor, complete todos los campos requeridos y corrija los errores.');
+                                                    }
+                                                    function confirmSave() {
+                                                    var confirmSave = confirm("¿Está seguro de que desea guardar el historial clínico? Una vez guardado, no será posible editarlo.");
+                                                    if (confirmSave) {
+                                                        return true;
+                                                    } else {
+                                                        return false;
+                                                    }
+                                                }
+                                                });
+                                            </script>
+
                                         </form>
                                         <div id="message"></div>
                                     </div>
@@ -251,7 +304,7 @@ foreach($person as $patient){
 
             // Optional: Form validation
             document.getElementById('clinicalHistoryForm').addEventListener('submit', function(e) {
-                const requiredFields = ['reason_consultation', 'current_symptoms', 'diagnostic', 'treatment_plan'];
+                const requiredFields = ['reason_consultation', 'current_symptoms', 'diagnostic', 'medications', 'treatment_plan'];
                 let isValid = true;
 
                 requiredFields.forEach(fieldName => {
