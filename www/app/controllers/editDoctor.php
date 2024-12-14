@@ -1,5 +1,5 @@
 <?php
-session_start();
+/*session_start();
 if (isset( $_SESSION)) {
     if (( $_SESSION['rol']) == "" or  $_SESSION['rol'] != '2') {
         echo '<script type="text/javascript">';
@@ -12,7 +12,7 @@ if (isset( $_SESSION)) {
         echo 'window.location.href="../views/login.php";';
         echo '</script>';
         exit();
-}
+}*/
 
 require_once '../models/updateSpecialist.php';
 
