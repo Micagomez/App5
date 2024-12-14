@@ -1,7 +1,13 @@
 <?php
 session_start();
-if (isset( $_SESSION)) {
-    if (( $_SESSION['rol']) == "" or  $_SESSION['rol'] != '3') {        
+
+require_once '../../models/getSpecialistLicenseSpecialty.php';
+require_once '../../models/getPersonById.php';
+require_once '../../models/getTypeConsultation.php';
+require_once '../../models/checkExistingHistory.php';
+
+if (isset($_SESSION)) {
+    if ($_SESSION['rol'] == "" or $_SESSION['rol'] != '3') {        
         echo '<script type="text/javascript">';
         echo 'window.location.href="../login.php";';
         echo '</script>';
@@ -14,27 +20,40 @@ if (isset( $_SESSION)) {
     exit();
 }
 
-require_once '../../models/getSpecialistLicenseSpecialty.php';
-require_once '../../models/getPersonById.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $personId = $_GET['id'];
 }
 
+$consultas = obtenerTipodeConsulta();
+
 $doctors = obtenerDatosEspecialistas();
-//var_dump($doctors);
 foreach($doctors as $doctor){
     if($doctor['specialist_id'] == $_SESSION['specialist']){
         $doctorName = $doctor['specialist_name'];
         $doctorSpeciality = $doctor['specialities'];
+        $idDoctorSpeciality = $doctor['speciality_ids'];
+        $doctorId = $doctor['specialist_id'];
     }
+}
+function calcularEdad($fechaNacimiento) {
+    $fechaNacimiento = new DateTime($fechaNacimiento);
+    $fechaActual = new DateTime();
+    $diferencia = $fechaActual->diff($fechaNacimiento);
+    return $diferencia->y;
 }
 
 $person = obtenerPersonaPorId($personId);
 foreach($person as $patient){
     $patientName = $patient['name'];
+    $birthDate = $patient['birth_date']; 
+    $patientAge = calcularEdad($birthDate);
 }
+
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -49,7 +68,7 @@ foreach($person as $patient){
                         <section id="page-title">
                             <div class="row">
                                 <div class="col-sm-8">
-                                    <h1 class="mainTitle">Médico | Agregar Historial Clínico</h1>
+                                    <h1 class="mainTitle">Médico | Agregar Historial Clínico Detallado</h1>
                                 </div>
                                 <ol class="breadcrumb">
                                     <li>
@@ -63,40 +82,202 @@ foreach($person as $patient){
                         </section>
                         <div class="container-fluid container-fullw bg-white">
                         <div class="row">
-                            <div class="col-lg-6 col-md-6">
+                            <div class="col-lg-12 col-md-12">
                                 <div class="panel panel-white">
                                     <div class="panel-body">
-                                        <form id = "appointmentForm" role="form" name="book" method="post" action="../../controllers/insertClinicalHistory.php">
-                                            <div class="form-group">
-                                                <label for="doctor">Médico</label>
-                                                <input type="text" class="form-control" readonly value="<?php echo $doctorName; ?>">
-                                                <input name="id_specialist" type="hidden" class="form-control" value="<?php echo $doctorId; ?>">
+                                        <form id="clinicalHistoryForm" role="form" name="clinicalHistory" method="post" action="../../controllers/insertClinicalHistoryController.php">
+                                            <!-- Patient Information Section -->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="doctor">Médico</label>
+                                                        <input type="text" class="form-control" readonly value="<?php echo $doctorName; ?>">
+                                                        <input name="id_specialist" type="hidden" value="<?php echo $doctorId; ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="speciality">Especialización Médico</label>
+                                                        <input id="speciality" type="text" class="form-control" readonly value="<?php echo $doctorSpeciality; ?>">
+                                                        <input name="speciality_id" type="hidden" value="<?php echo $idDoctorSpeciality; ?>">                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="date">Fecha de Consulta</label>
+                                                        <input type="text" id="date" name="consultation_date" class="form-control" readonly>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label for="DoctorSpecialization">Especialización Médico</label>
-                                                <input id = "speciality" name="speciality" type="text" class="form-control" readonly value="<?php echo $doctorSpeciality; ?>">
+                                            <!-- Patient Basic Information -->
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="patient">Paciente</label>
+                                                        <input type="text" readonly class="form-control" value="<?php echo $patientName; ?>">
+                                                        <input type="hidden" name="id_patient" value="<?php echo $personId; ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="patient_age">Edad</label>
+                                                        <input type="text" readonly class="form-control" value="<?php echo $patientAge; ?>">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="consultation_type">Tipo de Consulta</label>
+                                                        <select name="id_consultation_type" class="form-control select2-multi" placeholder="Tipo de consulta" required>
+                                                        <?php
+                                                            if (!empty($consultas)) {
+                                                                foreach ($consultas as $consulta) {
+                                                                    echo '<option value="' . $consulta['id'] . '">' . $consulta['type'] . '</option>';
+                                                                }
+                                                            } else {
+                                                                echo '<option value="">No hay tipos de consulta disponibles</option>';
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <!-- Clinical Assessment Section -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="reason_consultation">Motivo de Consulta</label>
+                                                        <textarea name="reason_consultation" class="form-control" rows="3" required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="current_symptoms">Síntomas Actuales</label>
+                                                        <textarea name="current_symptoms" class="form-control" rows="3" required></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Physical Examination Section -->
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="blood_pressure">Presión Arterial (mmHg)</label>
+                                                        <input type="text" name="blood_pressure" class="form-control" placeholder="ej. 120/80">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="heart_rate">Frecuencia Cardíaca (bpm)</label>
+                                                        <input type="number" name="heart_rate" class="form-control" min="40" max="200">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="temperature">Temperatura (°C)</label>
+                                                        <input type="number" name="temperature" class="form-control" step="0.1" min="35" max="42">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="weight">Peso (kg)</label>
+                                                        <input type="number" name="weight" class="form-control" step="0.1" min="0">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Diagnosis and Treatment Section -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="diagnostic">Diagnóstico</label>
+                                                        <textarea name="diagnostic" class="form-control" rows="3" required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="treatment_plan">Plan de Tratamiento</label>
+                                                        <textarea name="treatment_plan" class="form-control" rows="3" required></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Medications Section -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="medications">Medicamentos Recetados</label>
+                                                        <textarea name="medications" class="form-control" rows="3" placeholder="Nombre del medicamento, dosis, frecuencia" required></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Additional Notes -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label for="additional_comments">Notas Adicionales</label>
+                                                        <textarea name="additional_comments" class="form-control" rows="3"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- <button type="submit" name="submit" class="btn btn-primary btn-block">Guardar Historial Clínico</button> -->
+                                            <button type="submit" name="submit" class="btn btn-primary btn-block" onclick="return confirmSave()">Guardar Historial Clínico</button>
                                             
-                                            <div class="form-group">
-                                                <label for="consultancyfees">Paciente</label>
-                                                <input type="text" readonly class="form-control" value="<?php echo $patientName; ?>">
-                                             </div>
+                                            <script>
+                                                document.getElementById('clinicalHistoryForm').addEventListener('submit', function(e) {
+                                                    // Validación de campos requeridos
+                                                    const requiredFields = [
+                                                        'id_consultation_type', 
+                                                        'reason_consultation', 
+                                                        'current_symptoms', 
+                                                        'diagnostic', 
+                                                        'medications',
+                                                        'treatment_plan'
+                                                    ];
+                                                    
+                                                    let isValid = true;
 
-                                             <div class="form-group">
-                                                <label for="date">Fecha</label>
-                                                <span id="date" class="form-control" readonly></span>
-                                            </div>
+                                                    requiredFields.forEach(fieldName => {
+                                                        const field = document.querySelector(`[name="${fieldName}"]`);
+                                                        if (!field || !field.value.trim()) {
+                                                            field.classList.add('is-invalid');
+                                                            isValid = false;
+                                                        } else {
+                                                            field.classList.remove('is-invalid');
+                                                        }
+                                                    });
 
-                                            <div class="form-group">
-                                                <label for="coment">Comentario de la consulta de hoy</label>
-                                                <textarea name="coment" id="coment" class="form-control" rows="5" style="width: 100%;"></textarea>
-                                            </div>
+                                                    // Validación de formato de presión arterial
+                                                    const bloodPressure = document.querySelector('[name="blood_pressure"]');
+                                                    if (bloodPressure && bloodPressure.value && !/^\d+\/\d+$/.test(bloodPressure.value)) {
+                                                        bloodPressure.classList.add('is-invalid');
+                                                        isValid = false;
+                                                        alert('La presión arterial debe tener el formato correcto (ej. 120/80).');
+                                                    } else if (bloodPressure) {
+                                                        bloodPressure.classList.remove('is-invalid');
+                                                    }
 
+                                                    // Cancelar el envío si no es válido
+                                                    if (!isValid) {
+                                                        e.preventDefault();
+                                                        alert('Por favor, complete todos los campos requeridos y corrija los errores.');
+                                                    }
+                                                    function confirmSave() {
+                                                    var confirmSave = confirm("¿Está seguro de que desea guardar el historial clínico? Una vez guardado, no será posible editarlo.");
+                                                    if (confirmSave) {
+                                                        return true;
+                                                    } else {
+                                                        return false;
+                                                    }
+                                                }
+                                                });
+                                            </script>
 
-                                            <button id = "button" type="submit" name="submit" class="btn btn-o btn-primary">Enviar</button>
                                         </form>
-                                        <div id = "messaje"></div>
+                                        <div id="message"></div>
                                     </div>
                                 </div>
                             </div>
@@ -105,30 +286,46 @@ foreach($person as $patient){
                 </div>
             </div>
         </div>
-
-
         
         <?php include('../include/script.php'); ?>
         
         <script>
-            // Obtener el campo de fecha
-            const dateSpan = document.getElementById('date');
-
-            // Crear una nueva fecha con la fecha actual
+            // Date formatting script
+            const dateInput = document.getElementById('date');
             const today = new Date();
             
-            // Formatear la fecha en DD-MM-YYYY
             const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+            const month = String(today.getMonth() + 1).padStart(2, '0');
             const year = today.getFullYear();
             
-            // Formato DD-MM-YYYY
             const formattedDate = `${day}-${month}-${year}`;
             
-            // Establecer la fecha actual en el span
-            dateSpan.textContent = formattedDate;
+            dateInput.value = formattedDate;
+
+            // Optional: Form validation
+            document.getElementById('clinicalHistoryForm').addEventListener('submit', function(e) {
+                const requiredFields = ['reason_consultation', 'current_symptoms', 'diagnostic', 'medications', 'treatment_plan'];
+                let isValid = true;
+
+                requiredFields.forEach(fieldName => {
+                    const field = document.querySelector(`[name="${fieldName}"]`);
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos requeridos.');
+                }
+            });
         </script>
         <?php include('../include/footer.php'); ?>
         <?php include('../include/setting.php'); ?>
     </body>
 </html>
+
+
