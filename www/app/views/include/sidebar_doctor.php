@@ -46,7 +46,7 @@
 					</a>
 					<ul class="sub-menu">
 						<li>
-							<a href="patientsList.php">
+							<a href="appointmentsToday.php">
 								<span class="title"> Lista de pacientes </span>
 							</a>
 						</li>
@@ -65,7 +65,7 @@
 					</a>
 					<ul class="sub-menu">
 						<li>
-							<a href="editProfile.php">
+							<a href="edit-profile.php">
 								<span class="title"> Editar perfil </span>
 							</a>
 						</li>
