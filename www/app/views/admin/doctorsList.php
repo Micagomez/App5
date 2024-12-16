@@ -74,7 +74,8 @@ $datosEspecialistas = obtenerDatosEspecialistas();
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <!-- <td class="hidden-xs"><?php
+                                    <!-- <td class="hidden-xs">
+                                        <?php
                                                         if($row['status'] == 1){
                                                             echo 'Activo';
                                                         }

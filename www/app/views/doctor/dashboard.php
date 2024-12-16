@@ -69,7 +69,7 @@ if(empty($_SESSION)){
                                         </span>
                                         <h2 class="StepTitle">Últimos Historiales Creados</h2>
                                         <p class="cl-effect-1">
-                                            <a href="listClinicalHistoy.php">
+                                            <a href="lastMedicalHistory.php">
                                                 Lista de historales clínicos
                                             </a>
                                         </p>
