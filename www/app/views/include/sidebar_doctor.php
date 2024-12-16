@@ -46,7 +46,7 @@
 					</a>
 					<ul class="sub-menu">
 						<li>
-							<a href="appointmentsToday.php">
+							<a href="lastMedicalHistory.php">
 								<span class="title"> Lista de pacientes </span>
 							</a>
 						</li>

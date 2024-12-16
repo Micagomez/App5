@@ -49,7 +49,7 @@ function insertClinicalHistory(
             // Redirigir en caso de éxito
             echo '<script type="text/javascript">';
             echo 'alert("Registro insertado correctamente.");';
-            echo 'window.location.href="../views/doctor/appointmentsToday.php";';
+            echo 'window.location.href="../views/doctor/medicalHistory.php";';
             echo '</script>';
         } catch (Exception $e) {
             $connection->rollBack();

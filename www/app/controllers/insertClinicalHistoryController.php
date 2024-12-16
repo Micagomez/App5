@@ -1,8 +1,6 @@
 <?php
 session_start();
-// include '../models/getTypeConsultation.php';
-// include '../models/getAppointmentByDay.php';
-// include '../models/insertAppointment.php';
+
 include '../models/insertClinicalHistoryModel.php';
 require_once '../models/checkExistingHistory.php'; // Incluir el modelo de verificación
 
@@ -93,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (existeHistorialClinico($idUser, $date)) {
         echo '<script type="text/javascript">';
         echo 'alert("Ya existe un historial clínico para este paciente en la fecha indicada.");';
-        echo 'window.location.href="../views/doctor/appointmentsToday.php";';
+        echo 'window.location.href="../views/doctor/medicalHistory.php";';
         echo '</script>';
         exit();
     }
